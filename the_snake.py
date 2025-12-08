@@ -1,6 +1,4 @@
-from random import choice, randint
-
-from turtle import position
+from random import randint
 
 import pygame
 
@@ -50,6 +48,7 @@ class GameObject:
     def draw(self):
         pass
 
+
 class Apple(GameObject):
     def __init__(self):
         super().__init__()
@@ -65,6 +64,7 @@ class Apple(GameObject):
         point_x = randint(0, GRID_WIDTH - 1) * GRID_SIZE
         point_y = randint(0, GRID_HEIGHT - 1) * GRID_SIZE
         self.position = (point_x, point_y)
+
 
 class Snake(GameObject):
     def __init__(self):
@@ -95,7 +95,6 @@ class Snake(GameObject):
             last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
             pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
-
     def move(self):
         self.update_direction()
         current_head_x, current_head_y = self.positions[0]
@@ -122,10 +121,9 @@ class Snake(GameObject):
             raise SystemExit
 
         self.positions.insert(0, new_head_position)
-        
-        self.last = self.positions.pop()
+        if len(self.positions) > self.length:
+            self.last = self.positions.pop()
 
-    
 
 # Функция обработки действий пользователя
 def handle_keys(game_object):
@@ -143,6 +141,7 @@ def handle_keys(game_object):
             elif event.key == pygame.K_RIGHT and game_object.direction != LEFT:
                 game_object.next_direction = RIGHT
 
+
 def main():
     # Инициализация PyGame:
     pygame.init()
@@ -152,7 +151,8 @@ def main():
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
-        old_tail = snake.positions[-1]  
+        old_tail = snake.positions[-1]
+        snake.move()
         if snake.positions[0] == apple.position:
             snake.positions.append(old_tail)
             print('Змейка съела яблоко!')
@@ -161,10 +161,7 @@ def main():
         screen.fill(BOARD_BACKGROUND_COLOR)
         apple.draw()
         snake.draw()
-        snake.move() 
         pygame.display.update()
-        # Тут опишите основную логику игры.
-        
 
 
 if __name__ == '__main__':
