@@ -123,7 +123,7 @@ class Snake(GameObject):
         new_head_position = (new_head_x, new_head_y)
 
         if new_head_position in self.positions[:-1]:
-            print('Змейка врезалась в себя. Игра окончена :(')
+            # print('Змейка врезалась в себя. Игра окончена :(')
             pygame.quit()
             raise SystemExit
 
@@ -161,7 +161,6 @@ def main():
         snake.move()
         if snake.positions[0] == apple.position:
             snake.positions.append(old_tail)
-            print('Змейка съела яблоко!')
             snake.length += 1
             apple.random_position()
         screen.fill(BOARD_BACKGROUND_COLOR)
