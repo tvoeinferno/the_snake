@@ -123,7 +123,6 @@ class Snake(GameObject):
         new_head_position = (new_head_x, new_head_y)
 
         if new_head_position in self.positions[:-1]:
-            # print('Змейка врезалась в себя. Игра окончена :(')
             pygame.quit()
             raise SystemExit
 
