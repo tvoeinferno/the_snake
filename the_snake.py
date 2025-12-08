@@ -40,9 +40,7 @@ clock = pygame.time.Clock()
 
 
 class GameObject:
-    """
-    Docsting для GameObject
-    """
+    """Docsting для GameObject"""
 
     def __init__(self) -> None:
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
@@ -50,9 +48,7 @@ class GameObject:
 
 
 class Apple(GameObject):
-    """
-    Docstring для Apple
-    """
+    """Docstring для Apple"""
 
     def __init__(self):
         super().__init__()
@@ -60,26 +56,20 @@ class Apple(GameObject):
         self.random_position()
 
     def draw(self):
-        """
-        Метод draw для Apple
-        """
+        """Метод draw для Apple"""
         rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     def random_position(self):
-        """
-        Метод для определения позиции яблока
-        """
+        """Метод для определения позиции яблока"""
         point_x = randint(0, GRID_WIDTH - 1) * GRID_SIZE
         point_y = randint(0, GRID_HEIGHT - 1) * GRID_SIZE
         self.position = (point_x, point_y)
 
 
 class Snake(GameObject):
-    """
-    Docstring для Snake
-    """
+    """Docstring для Snake"""
 
     def __init__(self):
         super().__init__()
@@ -91,17 +81,13 @@ class Snake(GameObject):
         self.last = None
 
     def update_direction(self):
-        """
-        Метод обновления направления после нажатия
-        """
+        """Метод обновления направления после нажатия"""
         if self.next_direction:
             self.direction = self.next_direction
             self.next_direction = None
 
     def draw(self):
-        """
-        Метод draw класса Snake
-        """
+        """Метод draw класса Snake"""
         for position in self.positions[:-1]:
             rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
             pygame.draw.rect(screen, self.body_color, rect)
@@ -116,9 +102,7 @@ class Snake(GameObject):
             pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def move(self):
-        """
-        Метод движения змеи
-        """
+        """Метод движения змеи"""
         self.update_direction()
         current_head_x, current_head_y = self.positions[0]
         direction_x, direction_y = self.direction
@@ -149,9 +133,7 @@ class Snake(GameObject):
 
 
 def handle_keys(game_object):
-    """
-    Функция обработки действий пользователя
-    """
+    """Функция обработки действий пользователя"""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -168,9 +150,7 @@ def handle_keys(game_object):
 
 
 def main():
-    """
-    Основная логика игры
-    """
+    """Основная логика игры"""
     pygame.init()
     apple = Apple()
     snake = Snake()
