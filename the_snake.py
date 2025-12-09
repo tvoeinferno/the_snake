@@ -133,6 +133,7 @@ class Snake(GameObject):
             self.last = self.positions.pop()
 
     def get_head_position(self):
+        """Метод вычисления позиции головы"""
         current_head_x, current_head_y = self.positions[0]
         direction_x, direction_y = self.direction
 
