@@ -112,11 +112,8 @@ class Snake(GameObject):
     def move(self):
         """Метод движения змеи"""
         self.update_direction()
-        current_head_x, current_head_y = self.positions[0]
-        direction_x, direction_y = self.direction
 
-        new_head_x = current_head_x + direction_x * GRID_SIZE
-        new_head_y = current_head_y + direction_y * GRID_SIZE
+        new_head_x, new_head_y = self.get_head_position()
 
         if new_head_x < 0:
             new_head_x = SCREEN_WIDTH - GRID_SIZE
@@ -128,14 +125,21 @@ class Snake(GameObject):
         elif new_head_y > SCREEN_HEIGHT - 1:
             new_head_y = 0
 
-        new_head_position = (new_head_x, new_head_y)
-
-        if new_head_position in self.positions[:-1]:
+        if self.get_head_position() in self.positions[:-1]:
             self.reset()
 
-        self.positions.insert(0, new_head_position)
+        self.positions.insert(0, self.get_head_position())
         if len(self.positions) > self.length + 1:
             self.last = self.positions.pop()
+
+    def get_head_position(self):
+        current_head_x, current_head_y = self.positions[0]
+        direction_x, direction_y = self.direction
+
+        new_head_x = current_head_x + direction_x * GRID_SIZE
+        new_head_y = current_head_y + direction_y * GRID_SIZE
+
+        return new_head_x, new_head_y
 
 
 def handle_keys(game_object):
