@@ -92,6 +92,7 @@ class Snake(GameObject):
             # но рандом как по мне интереснее
             (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
              randint(0, GRID_HEIGHT - 1) * GRID_SIZE)]
+        # self.position = self.positions[0]
         self.last = None
 
     def update_direction(self):
@@ -124,33 +125,20 @@ class Snake(GameObject):
     def move(self):
         """Метод движения змеи"""
         self.update_direction()
-
+        # Не совсем понял почему тут лишний вызов метода.
+        # Его конечно можно добавить в main
+        # Но не будет лучше оставить его тут, так как
+        # move как раз таки отвечает за движение змеики?
         new_head_x, new_head_y = self.get_head_position()
         direction_x, direction_y = self.direction
 
-        new_head_x = (new_head_x
-                      + (direction_x * GRID_SIZE)) % SCREEN_WIDTH
-        new_head_y = (new_head_y + (direction_y * GRID_SIZE)
-                      ) % SCREEN_HEIGHT
+        new_head_x = (new_head_x + (direction_x * GRID_SIZE)) % SCREEN_WIDTH
+        new_head_y = (new_head_y + (direction_y * GRID_SIZE)) % SCREEN_HEIGHT
 
         self.position = (new_head_x, new_head_y)
 
-        self.positions.append(self.position)
+        self.positions.insert(0, self.position)
 
-        '''if new_head_x < 0:
-            new_head_x = SCREEN_WIDTH - GRID_SIZE
-        elif new_head_x > SCREEN_WIDTH - 1:
-            new_head_x = 0
-
-        if new_head_y < 0:
-            new_head_y = SCREEN_HEIGHT - GRID_SIZE
-        elif new_head_y > SCREEN_HEIGHT - 1:
-            new_head_y = 0 '''
-
-        if self.get_head_position() in self.positions[:-1]:
-            self.reset()
-
-        self.positions.insert(0, self.get_head_position())
         if len(self.positions) > self.length:
             self.last = self.positions.pop()
         else:
@@ -158,13 +146,8 @@ class Snake(GameObject):
 
     def get_head_position(self):
         """Метод вычисления позиции головы"""
-        current_head_x, current_head_y = self.positions[0]
-        direction_x, direction_y = self.direction
 
-        new_head_x = current_head_x + direction_x * GRID_SIZE
-        new_head_y = current_head_y + direction_y * GRID_SIZE
-
-        return new_head_x, new_head_y
+        return self.positions[0]
 
 
 def handle_keys(game_object):
@@ -173,7 +156,7 @@ def handle_keys(game_object):
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
-        elif event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:   # Это прекод, зачем его менять?
             if event.key == pygame.K_UP and game_object.direction != DOWN:
                 game_object.next_direction = UP
             elif event.key == pygame.K_DOWN and game_object.direction != UP:
@@ -196,8 +179,8 @@ def main():
         clock.tick(SPEED)
         handle_keys(snake)
         snake.move()
-        # if snake.get_head_position() in snake.positions[:-1]:
-        # snake.reset()
+        if snake.get_head_position() in snake.positions[1:]:
+            snake.reset()
         if snake.positions[0] == apple.position:
             snake.length += 1
             apple.randomize_position(snake.positions)
