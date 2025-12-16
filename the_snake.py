@@ -2,6 +2,7 @@ from random import randint
 
 import pygame
 
+
 # Константы для размеров поля и сетки:
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 GRID_SIZE = 20
@@ -44,7 +45,7 @@ class GameObject:
 
     def __init__(self) -> None:
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
-        self.body_color = None
+        self.body_color = None  # Цвет - это аргумент init
 
     def draw(self):
         """Метод draw для GameObject"""
@@ -54,10 +55,12 @@ class GameObject:
 class Apple(GameObject):
     """Docstring для Apple"""
 
-    def __init__(self):
+    def __init__(self, occupy_positions=[]):
+        # Я вроде бы правильно тебя понял и добавил сюда аргумент
+        # Который по умолчанию как пустой список и передаю его
         super().__init__()
         self.body_color = APPLE_COLOR
-        self.randomize_position()
+        self.randomize_position(occupy_positions)  # Вот сюда
 
     def draw(self):
         """Метод draw для Apple"""
@@ -65,11 +68,11 @@ class Apple(GameObject):
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
-    def randomize_position(self):
+    def randomize_position(self, positions):
         """Метод для определения позиции яблока"""
-        point_x = randint(0, GRID_WIDTH - 1) * GRID_SIZE
-        point_y = randint(0, GRID_HEIGHT - 1) * GRID_SIZE
-        self.position = (point_x, point_y)
+        while self.position in positions:
+            self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+                             randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
 
 
 class Snake(GameObject):
@@ -78,10 +81,17 @@ class Snake(GameObject):
     def __init__(self):
         super().__init__()
         self.body_color = SNAKE_COLOR
-        self.length = 1
+        self.length = 1   # Решил не удалять длину,
+        # а удалил её из самого метода reset
         self.direction = RIGHT
         self.next_direction = None
-        self.positions = [(240, 120)]
+        self.positions = [
+            # Не понял, как это реализовано в 46 строке,
+            # решил сделать через рандом
+            # Можно конечно сделать что-то фиксированное,
+            # но рандом как по мне интереснее
+            (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+             randint(0, GRID_HEIGHT - 1) * GRID_SIZE)]
         self.last = None
 
     def update_direction(self):
@@ -92,8 +102,8 @@ class Snake(GameObject):
 
     def reset(self):
         """Метод сброса змейки"""
-        self.length = 1
         self.__init__()
+        screen.fill(BOARD_BACKGROUND_COLOR)
 
     def draw(self):
         """Метод draw класса Snake"""
@@ -102,6 +112,7 @@ class Snake(GameObject):
             pygame.draw.rect(screen, self.body_color, rect)
             pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
+        # Это прекод, я думаю его не обязательно менять.
         head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(screen, self.body_color, head_rect)
         pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
@@ -115,8 +126,18 @@ class Snake(GameObject):
         self.update_direction()
 
         new_head_x, new_head_y = self.get_head_position()
+        direction_x, direction_y = self.direction
 
-        if new_head_x < 0:
+        new_head_x = (new_head_x
+                      + (direction_x * GRID_SIZE)) % SCREEN_WIDTH
+        new_head_y = (new_head_y + (direction_y * GRID_SIZE)
+                      ) % SCREEN_HEIGHT
+
+        self.position = (new_head_x, new_head_y)
+
+        self.positions.append(self.position)
+
+        '''if new_head_x < 0:
             new_head_x = SCREEN_WIDTH - GRID_SIZE
         elif new_head_x > SCREEN_WIDTH - 1:
             new_head_x = 0
@@ -124,14 +145,16 @@ class Snake(GameObject):
         if new_head_y < 0:
             new_head_y = SCREEN_HEIGHT - GRID_SIZE
         elif new_head_y > SCREEN_HEIGHT - 1:
-            new_head_y = 0
+            new_head_y = 0 '''
 
         if self.get_head_position() in self.positions[:-1]:
             self.reset()
 
         self.positions.insert(0, self.get_head_position())
-        if len(self.positions) > self.length + 1:
+        if len(self.positions) > self.length:
             self.last = self.positions.pop()
+        else:
+            self.last = None
 
     def get_head_position(self):
         """Метод вычисления позиции головы"""
@@ -164,18 +187,20 @@ def handle_keys(game_object):
 def main():
     """Основная логика игры"""
     pygame.init()
+    # Передаю позицию змеи непосредственно в вызовах функции,
+    # не понимаю, как в Apple() передать snake.position?
+    # И нужно ли это в текущей реализации?
     apple = Apple()
     snake = Snake()
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
-        old_tail = snake.positions[-1]
         snake.move()
+        # if snake.get_head_position() in snake.positions[:-1]:
+        # snake.reset()
         if snake.positions[0] == apple.position:
-            snake.positions.append(old_tail)
             snake.length += 1
-            apple.randomize_position()
-        screen.fill(BOARD_BACKGROUND_COLOR)
+            apple.randomize_position(snake.positions)
         apple.draw()
         snake.draw()
         pygame.display.update()
