@@ -1,7 +1,6 @@
 from random import randint
 
-import pygame
-
+import pygame as pg
 
 # Константы для размеров поля и сетки:
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
@@ -31,13 +30,13 @@ SNAKE_COLOR = (0, 255, 0)
 SPEED = 10
 
 # Настройка игрового окна:
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
 
 # Заголовок окна игрового поля:
-pygame.display.set_caption('Змейка')
+pg.display.set_caption('Змейка')
 
 # Настройка времени:
-clock = pygame.time.Clock()
+clock = pg.time.Clock()
 
 
 class GameObject:
@@ -55,18 +54,21 @@ class GameObject:
 class Apple(GameObject):
     """Docstring для Apple"""
 
-    def __init__(self, occupy_positions=[]):
+    def __init__(self, occupy_positions=None):
         # Я вроде бы правильно тебя понял и добавил сюда аргумент
-        # Который по умолчанию как пустой список и передаю его
+        # Который по умолчанию как None, потому что flake8
+        # не дает поставить сюда пустой список
+        # Ниже я его переопределяю под пустой список
         super().__init__()
         self.body_color = APPLE_COLOR
-        self.randomize_position(occupy_positions)  # Вот сюда
+        occupy_positions = []
+        self.randomize_position(occupy_positions)
 
     def draw(self):
         """Метод draw для Apple"""
-        rect = pygame.Rect(self.position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, rect)
-        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+        rect = pg.Rect(self.position, (GRID_SIZE, GRID_SIZE))
+        pg.draw.rect(screen, self.body_color, rect)
+        pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
     def randomize_position(self, positions):
         """Метод для определения позиции яблока"""
@@ -92,7 +94,6 @@ class Snake(GameObject):
             # но рандом как по мне интереснее
             (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
              randint(0, GRID_HEIGHT - 1) * GRID_SIZE)]
-        # self.position = self.positions[0]
         self.last = None
 
     def update_direction(self):
@@ -109,18 +110,18 @@ class Snake(GameObject):
     def draw(self):
         """Метод draw класса Snake"""
         for position in self.positions[:-1]:
-            rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
-            pygame.draw.rect(screen, self.body_color, rect)
-            pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+            rect = (pg.Rect(position, (GRID_SIZE, GRID_SIZE)))
+            pg.draw.rect(screen, self.body_color, rect)
+            pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
         # Это прекод, я думаю его не обязательно менять.
-        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, head_rect)
-        pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
+        head_rect = pg.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
+        pg.draw.rect(screen, self.body_color, head_rect)
+        pg.draw.rect(screen, BORDER_COLOR, head_rect, 1)
 
         if self.last:
-            last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
-            pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
+            last_rect = pg.Rect(self.last, (GRID_SIZE, GRID_SIZE))
+            pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def move(self):
         """Метод движения змеи"""
@@ -146,30 +147,29 @@ class Snake(GameObject):
 
     def get_head_position(self):
         """Метод вычисления позиции головы"""
-
         return self.positions[0]
 
 
 def handle_keys(game_object):
     """Функция обработки действий пользователя"""
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
+            pg.quit()
             raise SystemExit
-        elif event.type == pygame.KEYDOWN:   # Это прекод, зачем его менять?
-            if event.key == pygame.K_UP and game_object.direction != DOWN:
+        elif event.type == pg.KEYDOWN:   # Это прекод, зачем его менять?
+            if event.key == pg.K_UP and game_object.direction != DOWN:
                 game_object.next_direction = UP
-            elif event.key == pygame.K_DOWN and game_object.direction != UP:
+            elif event.key == pg.K_DOWN and game_object.direction != UP:
                 game_object.next_direction = DOWN
-            elif event.key == pygame.K_LEFT and game_object.direction != RIGHT:
+            elif event.key == pg.K_LEFT and game_object.direction != RIGHT:
                 game_object.next_direction = LEFT
-            elif event.key == pygame.K_RIGHT and game_object.direction != LEFT:
+            elif event.key == pg.K_RIGHT and game_object.direction != LEFT:
                 game_object.next_direction = RIGHT
 
 
 def main():
     """Основная логика игры"""
-    pygame.init()
+    pg.init()
     # Передаю позицию змеи непосредственно в вызовах функции,
     # не понимаю, как в Apple() передать snake.position?
     # И нужно ли это в текущей реализации?
@@ -186,7 +186,7 @@ def main():
             apple.randomize_position(snake.positions)
         apple.draw()
         snake.draw()
-        pygame.display.update()
+        pg.display.update()
 
 
 if __name__ == '__main__':
