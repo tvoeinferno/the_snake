@@ -66,7 +66,7 @@ class Apple(GameObject):
 
     def randomize_position(self, occupy_positions):
         """Метод для определения позиции яблока."""
-        while self.position in occupy_positions:
+        while True:
             self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                              randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
             if self.position not in occupy_positions:
@@ -79,18 +79,8 @@ class Snake(GameObject):
     def __init__(self):
         super().__init__()
         self.body_color = SNAKE_COLOR
-        self.length = 1   # Решил не удалять длину,
-        # а удалил её из самого метода reset
         self.direction = RIGHT
-        self.next_direction = None
-        self.positions = [
-            # Не понял, как это реализовано в 46 строке,
-            # решил сделать через рандом
-            # Можно конечно сделать что-то фиксированное,
-            # но рандом как по мне интереснее
-            (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-             randint(0, GRID_HEIGHT - 1) * GRID_SIZE)]
-        self.last = None
+        self.reset()
 
     def update_direction(self):
         """Метод обновления направления после нажатия."""
@@ -100,7 +90,16 @@ class Snake(GameObject):
 
     def reset(self):
         """Метод сброса змейки."""
-        self.__init__()
+        self.length = 1
+        self.next_direction = None
+        self.positions = [
+            # Не понял, как это реализовано в 46 строке,
+            # решил сделать через рандом
+            # Можно конечно сделать что-то фиксированное,
+            # но рандом как по мне интереснее
+            (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+             randint(0, GRID_HEIGHT - 1) * GRID_SIZE)]
+        self.last = None
 
     def draw(self):
         """Метод draw класса Snake."""
@@ -145,7 +144,7 @@ def handle_keys(game_object):
         if event.type == pg.QUIT:
             pg.quit()
             raise SystemExit
-        elif event.type == pg.KEYDOWN:   # Это прекод, зачем его менять?
+        elif event.type == pg.KEYDOWN:
             if event.key == pg.K_UP and game_object.direction != DOWN:
                 game_object.next_direction = UP
             elif event.key == pg.K_DOWN and game_object.direction != UP:
@@ -171,6 +170,7 @@ def main():
         snake.move()
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
+            print(snake.positions)
             apple.randomize_position(snake.positions)
             screen.fill(BOARD_BACKGROUND_COLOR)
         elif snake.get_head_position() == apple.position:
