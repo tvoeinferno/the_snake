@@ -40,45 +40,41 @@ clock = pg.time.Clock()
 
 
 class GameObject:
-    """Docsting для GameObject"""
+    """Docsting для GameObject."""
 
     def __init__(self) -> None:
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
         self.body_color = None  # Цвет - это аргумент init
 
     def draw(self):
-        """Метод draw для GameObject"""
-        pass
+        """Метод draw для GameObject."""
 
 
 class Apple(GameObject):
-    """Docstring для Apple"""
+    """Docstring для Apple."""
 
     def __init__(self, occupy_positions=None):
-        # Я вроде бы правильно тебя понял и добавил сюда аргумент
-        # Который по умолчанию как None, потому что flake8
-        # не дает поставить сюда пустой список
-        # Ниже я его переопределяю под пустой список
         super().__init__()
         self.body_color = APPLE_COLOR
-        occupy_positions = []
-        self.randomize_position(occupy_positions)
+        self.randomize_position(occupy_positions or [])
 
     def draw(self):
-        """Метод draw для Apple"""
+        """Метод draw для Apple."""
         rect = pg.Rect(self.position, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, self.body_color, rect)
         pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
-    def randomize_position(self, positions):
-        """Метод для определения позиции яблока"""
-        while self.position in positions:
+    def randomize_position(self, occupy_positions):
+        """Метод для определения позиции яблока."""
+        while self.position in occupy_positions:
             self.position = (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                              randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
+            if self.position not in occupy_positions:
+                break
 
 
 class Snake(GameObject):
-    """Docstring для Snake"""
+    """Docstring для Snake."""
 
     def __init__(self):
         super().__init__()
@@ -97,25 +93,23 @@ class Snake(GameObject):
         self.last = None
 
     def update_direction(self):
-        """Метод обновления направления после нажатия"""
+        """Метод обновления направления после нажатия."""
         if self.next_direction:
             self.direction = self.next_direction
             self.next_direction = None
 
     def reset(self):
-        """Метод сброса змейки"""
+        """Метод сброса змейки."""
         self.__init__()
-        screen.fill(BOARD_BACKGROUND_COLOR)
 
     def draw(self):
-        """Метод draw класса Snake"""
+        """Метод draw класса Snake."""
         for position in self.positions[:-1]:
             rect = (pg.Rect(position, (GRID_SIZE, GRID_SIZE)))
             pg.draw.rect(screen, self.body_color, rect)
             pg.draw.rect(screen, BORDER_COLOR, rect, 1)
 
-        # Это прекод, я думаю его не обязательно менять.
-        head_rect = pg.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
+        head_rect = pg.Rect(self.get_head_position(), (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(screen, self.body_color, head_rect)
         pg.draw.rect(screen, BORDER_COLOR, head_rect, 1)
 
@@ -124,19 +118,14 @@ class Snake(GameObject):
             pg.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def move(self):
-        """Метод движения змеи"""
-        self.update_direction()
-        # Не совсем понял почему тут лишний вызов метода.
-        # Его конечно можно добавить в main
-        # Но не будет лучше оставить его тут, так как
-        # move как раз таки отвечает за движение змеики?
+        """Метод движения змеи."""
         new_head_x, new_head_y = self.get_head_position()
         direction_x, direction_y = self.direction
 
-        new_head_x = (new_head_x + (direction_x * GRID_SIZE)) % SCREEN_WIDTH
-        new_head_y = (new_head_y + (direction_y * GRID_SIZE)) % SCREEN_HEIGHT
-
-        self.position = (new_head_x, new_head_y)
+        self.position = ((new_head_x + (direction_x * GRID_SIZE)) %
+                         SCREEN_WIDTH,
+                         (new_head_y + (direction_y * GRID_SIZE)) %
+                         SCREEN_HEIGHT)
 
         self.positions.insert(0, self.position)
 
@@ -146,12 +135,12 @@ class Snake(GameObject):
             self.last = None
 
     def get_head_position(self):
-        """Метод вычисления позиции головы"""
+        """Метод вычисления позиции головы."""
         return self.positions[0]
 
 
 def handle_keys(game_object):
-    """Функция обработки действий пользователя"""
+    """Функция обработки действий пользователя."""
     for event in pg.event.get():
         if event.type == pg.QUIT:
             pg.quit()
@@ -168,7 +157,7 @@ def handle_keys(game_object):
 
 
 def main():
-    """Основная логика игры"""
+    """Основная логика игры."""
     pg.init()
     # Передаю позицию змеи непосредственно в вызовах функции,
     # не понимаю, как в Apple() передать snake.position?
@@ -178,10 +167,13 @@ def main():
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
+        snake.update_direction()
         snake.move()
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
-        if snake.positions[0] == apple.position:
+            apple.randomize_position(snake.positions)
+            screen.fill(BOARD_BACKGROUND_COLOR)
+        elif snake.get_head_position() == apple.position:
             snake.length += 1
             apple.randomize_position(snake.positions)
         apple.draw()
