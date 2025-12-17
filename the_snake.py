@@ -42,9 +42,9 @@ clock = pg.time.Clock()
 class GameObject:
     """Docsting для GameObject."""
 
-    def __init__(self) -> None:
+    def __init__(self, body_color=None) -> None:
         self.position = ((SCREEN_WIDTH // 2), (SCREEN_HEIGHT // 2))
-        self.body_color = None  # Цвет - это аргумент init
+        self.body_color = body_color
 
     def draw(self):
         """Метод draw для GameObject."""
@@ -54,8 +54,7 @@ class Apple(GameObject):
     """Docstring для Apple."""
 
     def __init__(self, occupy_positions=None):
-        super().__init__()
-        self.body_color = APPLE_COLOR
+        super().__init__(body_color=APPLE_COLOR)
         self.randomize_position(occupy_positions or [])
 
     def draw(self):
@@ -77,8 +76,7 @@ class Snake(GameObject):
     """Docstring для Snake."""
 
     def __init__(self):
-        super().__init__()
-        self.body_color = SNAKE_COLOR
+        super().__init__(body_color=SNAKE_COLOR)
         self.direction = RIGHT
         self.reset()
 
@@ -144,7 +142,7 @@ def handle_keys(game_object):
         if event.type == pg.QUIT:
             pg.quit()
             raise SystemExit
-        elif event.type == pg.KEYDOWN:
+        if event.type == pg.KEYDOWN:
             if event.key == pg.K_UP and game_object.direction != DOWN:
                 game_object.next_direction = UP
             elif event.key == pg.K_DOWN and game_object.direction != UP:
@@ -161,8 +159,8 @@ def main():
     # Передаю позицию змеи непосредственно в вызовах функции,
     # не понимаю, как в Apple() передать snake.position?
     # И нужно ли это в текущей реализации?
-    apple = Apple()
     snake = Snake()
+    apple = Apple(snake.positions)
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
@@ -170,7 +168,6 @@ def main():
         snake.move()
         if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
-            print(snake.positions)
             apple.randomize_position(snake.positions)
             screen.fill(BOARD_BACKGROUND_COLOR)
         elif snake.get_head_position() == apple.position:
