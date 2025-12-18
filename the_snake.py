@@ -1,4 +1,4 @@
-from random import randint, choice
+from random import choice, randint
 
 import pygame as pg
 
@@ -89,7 +89,6 @@ class Snake(GameObject):
     def reset(self):
         """Метод сброса змейки."""
         self.length = 1
-        # self.next_direction = None
         self.positions = [self.position]
         self.last = None
         # direction_list без self потому что используется только в этом методе
@@ -162,7 +161,7 @@ def main():
         handle_keys(snake)
         snake.update_direction()
         snake.move()
-        if snake.get_head_position() in snake.positions[0:]:
+        if snake.get_head_position() in snake.positions[1:]:
             snake.reset()
             apple.randomize_position(snake.positions)
             screen.fill(BOARD_BACKGROUND_COLOR)
