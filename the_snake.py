@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 import pygame as pg
 
@@ -77,8 +77,8 @@ class Snake(GameObject):
 
     def __init__(self):
         super().__init__(body_color=SNAKE_COLOR)
-        self.direction = RIGHT
         self.reset()
+        self.direction = RIGHT
 
     def update_direction(self):
         """Метод обновления направления после нажатия."""
@@ -89,15 +89,14 @@ class Snake(GameObject):
     def reset(self):
         """Метод сброса змейки."""
         self.length = 1
-        self.next_direction = None
-        self.positions = [
-            # Не понял, как это реализовано в 46 строке,
-            # решил сделать через рандом
-            # Можно конечно сделать что-то фиксированное,
-            # но рандом как по мне интереснее
-            (randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-             randint(0, GRID_HEIGHT - 1) * GRID_SIZE)]
+        # self.next_direction = None
+        self.positions = [self.position]
         self.last = None
+        # direction_list без self потому что используется только в этом методе
+        # как я понял, функция choice выбирает случайный элемент
+        # последовательности, потому и решил это сделать через direction_list
+        direction_list = UP, DOWN, RIGHT, LEFT
+        self.next_direction = choice(direction_list)
 
     def draw(self):
         """Метод draw класса Snake."""
@@ -156,9 +155,6 @@ def handle_keys(game_object):
 def main():
     """Основная логика игры."""
     pg.init()
-    # Передаю позицию змеи непосредственно в вызовах функции,
-    # не понимаю, как в Apple() передать snake.position?
-    # И нужно ли это в текущей реализации?
     snake = Snake()
     apple = Apple(snake.positions)
     while True:
@@ -166,7 +162,7 @@ def main():
         handle_keys(snake)
         snake.update_direction()
         snake.move()
-        if snake.get_head_position() in snake.positions[1:]:
+        if snake.get_head_position() in snake.positions[0:]:
             snake.reset()
             apple.randomize_position(snake.positions)
             screen.fill(BOARD_BACKGROUND_COLOR)
